@@ -295,14 +295,69 @@ public class StrategyManager {
 			BuildManager.Instance().buildQueue.queueAsLowestPriority(UnitType.Terran_Nuclear_Missile);
 			*/
 		} else if (MyBotModule.Broodwar.self().getRace() == Race.Zerg) {
-			BuildManager.Instance().buildQueue.queueAsLowestPriority(InformationManager.Instance().getWorkerType(), BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
-			BuildManager.Instance().buildQueue.queueAsLowestPriority(InformationManager.Instance().getWorkerType(), BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
+			// //////////////
+			// 4드론 전략...
+			// 한 방에 적을 찾으면 이길 수 있지만, 그렇지 못하면 질 확률이 높다.
+			// //////////////
+			// 스포닝 풀을 짓는다.
 			BuildManager.Instance().buildQueue.queueAsLowestPriority(UnitType.Zerg_Spawning_Pool, BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
+			// 드론 1기 생성
 			BuildManager.Instance().buildQueue.queueAsLowestPriority(InformationManager.Instance().getWorkerType(), BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
+			// 6저글링
 			BuildManager.Instance().buildQueue.queueAsLowestPriority(UnitType.Zerg_Zergling, BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
 			BuildManager.Instance().buildQueue.queueAsLowestPriority(UnitType.Zerg_Zergling, BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
 			BuildManager.Instance().buildQueue.queueAsLowestPriority(UnitType.Zerg_Zergling, BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
+			// 오버로드 생성
 			BuildManager.Instance().buildQueue.queueAsLowestPriority(InformationManager.Instance().getBasicSupplyProviderUnitType(), BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
+			// 추가 저글링
+			for (int i = 0; i < 1000; ++i) {
+				BuildManager.Instance().buildQueue.queueAsLowestPriority(UnitType.Zerg_Zergling, BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
+			}
+			/*
+			// //////////////
+			// 9드론 전략...
+			// //////////////
+			// 드론을 9마리 까지 생성한다.
+			BuildManager.Instance().buildQueue.queueAsLowestPriority(InformationManager.Instance().getWorkerType(), BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
+			BuildManager.Instance().buildQueue.queueAsLowestPriority(InformationManager.Instance().getWorkerType(), BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
+			BuildManager.Instance().buildQueue.queueAsLowestPriority(InformationManager.Instance().getWorkerType(), BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
+			BuildManager.Instance().buildQueue.queueAsLowestPriority(InformationManager.Instance().getWorkerType(), BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
+			BuildManager.Instance().buildQueue.queueAsLowestPriority(InformationManager.Instance().getWorkerType(), BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
+			// 스포닝 풀 짓기
+			BuildManager.Instance().buildQueue.queueAsLowestPriority(UnitType.Zerg_Spawning_Pool, BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
+			// 드론 1기 보충
+			BuildManager.Instance().buildQueue.queueAsLowestPriority(InformationManager.Instance().getWorkerType(), BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
+			// 오버로드 보충
+			BuildManager.Instance().buildQueue.queueAsLowestPriority(InformationManager.Instance().getBasicSupplyProviderUnitType(), BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
+			// 드론 1기 보충
+			BuildManager.Instance().buildQueue.queueAsLowestPriority(InformationManager.Instance().getWorkerType(), BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
+			// 6저글링
+			BuildManager.Instance().buildQueue.queueAsLowestPriority(UnitType.Zerg_Zergling, BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
+			BuildManager.Instance().buildQueue.queueAsLowestPriority(UnitType.Zerg_Zergling, BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
+			BuildManager.Instance().buildQueue.queueAsLowestPriority(UnitType.Zerg_Zergling, BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
+			// 해처리 추가
+			BuildManager.Instance().buildQueue.queueAsLowestPriority(UnitType.Zerg_Hatchery, BuildOrderItem.SeedPositionStrategy.FirstExpansionLocation);
+			// 4저글링
+			BuildManager.Instance().buildQueue.queueAsLowestPriority(UnitType.Zerg_Zergling, BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
+			BuildManager.Instance().buildQueue.queueAsLowestPriority(UnitType.Zerg_Zergling, BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
+			// 오버로드 보충
+			BuildManager.Instance().buildQueue.queueAsLowestPriority(InformationManager.Instance().getBasicSupplyProviderUnitType(), BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
+			// 해처리 추가
+			BuildManager.Instance().buildQueue.queueAsLowestPriority(UnitType.Zerg_Hatchery, BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
+			// 12 저글링
+			BuildManager.Instance().buildQueue.queueAsLowestPriority(UnitType.Zerg_Zergling, BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
+			BuildManager.Instance().buildQueue.queueAsLowestPriority(UnitType.Zerg_Zergling, BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
+			BuildManager.Instance().buildQueue.queueAsLowestPriority(UnitType.Zerg_Zergling, BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
+			BuildManager.Instance().buildQueue.queueAsLowestPriority(UnitType.Zerg_Zergling, BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
+			BuildManager.Instance().buildQueue.queueAsLowestPriority(UnitType.Zerg_Zergling, BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
+			BuildManager.Instance().buildQueue.queueAsLowestPriority(UnitType.Zerg_Zergling, BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
+			// 드론 1기 보충
+			BuildManager.Instance().buildQueue.queueAsLowestPriority(InformationManager.Instance().getWorkerType(), BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
+			// 추가 저글링
+			for (int i = 0; i < 1000; ++i) {
+				BuildManager.Instance().buildQueue.queueAsLowestPriority(UnitType.Zerg_Zergling, BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
+			}
+			*/
 
 			/*
 			BuildManager.Instance().buildQueue.queueAsLowestPriority(UnitType.Zerg_Hatchery,

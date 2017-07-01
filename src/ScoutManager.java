@@ -4,8 +4,10 @@ import java.util.Vector;
 
 import bwapi.Color;
 import bwapi.Position;
+import bwapi.Race;
 import bwapi.TilePosition;
 import bwapi.Unit;
+import bwapi.UnitType;
 import bwta.BWTA;
 import bwta.BaseLocation;
 import bwta.Region;
@@ -58,6 +60,20 @@ public class ScoutManager {
 			if (currentScoutUnit == null || currentScoutUnit.exists() == false || currentScoutUnit.getHitPoints() <= 0) {
 				currentScoutUnit = null;
 				currentScoutStatus = ScoutStatus.NoScout.ordinal();
+
+				// 게임 시작 직후이고, 저그라면 오버로드를 정찰 유닛으로 지정한다.
+				if (MyBotModule.Broodwar.self().getRace() == Race.Zerg) {
+					// 0번 프레임은 건너 뛰고 1번 프레임부터 정찰한다.
+					if (0 == MyBotModule.Broodwar.getFrameCount()) {
+						return;
+					}
+					for (Unit unit : MyBotModule.Broodwar.self().getUnits()) {
+						if (unit.getType().equals(UnitType.Zerg_Overlord)) {
+							setScoutUnit(unit);
+							return;
+						}
+					}
+				}
 
 				// first building (Pylon / Supply Depot / Spawning Pool) 을 건설 시작한 후, 가장 가까이에 있는 Worker 를 정찰유닛으로 지정한다
 				Unit firstBuilding = null;
@@ -113,9 +129,13 @@ public class ScoutManager {
 				for (BaseLocation startLocation : BWTA.getStartLocations()) {
 					// if we haven't explored it yet (방문했었던 곳은 다시 가볼 필요 없음)
 					if (MyBotModule.Broodwar.isExplored(startLocation.getTilePosition()) == false) {
-						// GroundDistance 를 기준으로 가장 가까운 곳으로 선정
-						tempDistance = (double) (InformationManager.Instance().getMainBaseLocation(MyBotModule.Broodwar.self()).getGroundDistance(startLocation) + 0.5);
-
+						if (currentScoutUnit.isFlying()) {
+							// AirDistance 를 기준으로 가장 가까운 곳으로 선정
+							tempDistance = (double) (InformationManager.Instance().getMainBaseLocation(MyBotModule.Broodwar.self()).getAirDistance(startLocation) + 0.5);
+						} else {
+							// GroundDistance 를 기준으로 가장 가까운 곳으로 선정
+							tempDistance = (double) (InformationManager.Instance().getMainBaseLocation(MyBotModule.Broodwar.self()).getGroundDistance(startLocation) + 0.5);
+						}
 						if (tempDistance > 0 && tempDistance < closestDistance) {
 							closestBaseLocation = startLocation;
 							closestDistance = tempDistance;
@@ -334,6 +354,11 @@ public class ScoutManager {
 	/// 정찰 유닛을 리턴합니다
 	public Unit getScoutUnit() {
 		return currentScoutUnit;
+	}
+
+	/// 정찰 유닛을 지정합니다.
+	public void setScoutUnit(Unit scoutUnit) {
+		this.currentScoutUnit = scoutUnit;
 	}
 
 	// 정찰 상태를 리턴합니다
