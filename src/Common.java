@@ -9,10 +9,9 @@ import java.io.IOException;
 public class Common {
 
 	/// 로그 유틸
-	public void appendTextToFile(final String logFile, final String msg)
-	{
+	public void appendTextToFile(final String logFile, final String msg) {
 		try {
-			BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(new File(msg), true))  ;
+			BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(new File(msg), true));
 			bos.write(msg.getBytes());
 			bos.flush();
 			bos.close();
@@ -24,10 +23,9 @@ public class Common {
 	}
 
 	/// 로그 유틸
-	public void overwriteToFile(final String logFile, final String msg)
-	{
+	public void overwriteToFile(final String logFile, final String msg) {
 		try {
-			BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(new File(msg)))  ;
+			BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(new File(msg)));
 			bos.write(msg.getBytes());
 			bos.flush();
 			bos.close();
@@ -39,17 +37,16 @@ public class Common {
 	}
 
 	/// 파일 유틸 - 텍스트 파일을 읽어들인다
-	public String readFile(final String filename)
-	{
+	public String readFile(final String filename) {
 		BufferedInputStream bis;
 		StringBuilder sb = null;
 		try {
 			bis = new BufferedInputStream(new FileInputStream(new File(filename)));
-	        sb = new StringBuilder();
+			sb = new StringBuilder();
 
-	        while (bis.available() > 0) {
-	            sb.append((char) bis.read());
-	        }
+			while (bis.available() > 0) {
+				sb.append((char) bis.read());
+			}
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -60,8 +57,7 @@ public class Common {
 	}
 
 	/// 파일 유틸 - 경기 결과를 텍스트 파일로부터 읽어들인다
-	public void readResults()
-	{
+	public void readResults() {
 		String enemyName = MyBotModule.Broodwar.enemy().getName();
 		enemyName = enemyName.replace(" ", "_");
 
@@ -92,8 +88,7 @@ public class Common {
 	}
 
 	/// 파일 유틸 - 경기 결과를 텍스트 파일에 저장한다
-	public void writeResults()
-	{
+	public void writeResults() {
 		String enemyName = MyBotModule.Broodwar.enemy().getName();
 		enemyName = enemyName.replace(" ", "_");
 

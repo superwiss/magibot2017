@@ -1,13 +1,11 @@
 import bwapi.Position;
 
-public class WorkerMoveData
-{
+public class WorkerMoveData {
 	private int mineralsNeeded;
 	private int gasNeeded;
 	private Position position;
 
-	public WorkerMoveData(int m, int g, Position p)
-	{
+	public WorkerMoveData(int m, int g, Position p) {
 		mineralsNeeded = m;
 		gasNeeded = g;
 		position = p;

@@ -1,27 +1,19 @@
-import java.util.Set;
-
 import bwapi.Color;
-import bwapi.UnitType;
 
 /// 봇 프로그램 설정
 public class Config {
-	
+
 	/// 봇 이름
 	public static final String BotName = "NoNameBot";
 	/// 봇 개발자 이름
 	public static final String BotAuthors = "NoName";
-	
-	
-	
+
 	/// 로그 파일 이름
 	public static String LogFilename = "log.txt";
 	/// 읽기 파일 경로
 	public static String ReadDirectory = "bwapi-data\\AI\\MyBot\\read\\";
 	/// 쓰기 파일 경로
-	public static String WriteDirectory = "bwapi-data\\AI\\MyBot\\write\\";		
-
-	
-	
+	public static String WriteDirectory = "bwapi-data\\AI\\MyBot\\write\\";
 
 	/// 로컬에서 게임을 실행할 때 게임스피드 (코드 제출 후 서버에서 게임을 실행할 때는 서버 설정을 사용함)<br>
 	/// Speedups for automated play, sets the number of milliseconds bwapi spends in each frame<br>
@@ -29,21 +21,20 @@ public class Config {
 	/// Normal: 67 ms/frame. 1초에 15 frame<br>
 	/// As fast as possible : 0 ms/frame. CPU가 할수있는 가장 빠른 속도.
 	public static int SetLocalSpeed = 10;
-	
+
 	/// 로컬에서 게임을 실행할 때 FrameSkip (코드 제출 후 서버에서 게임을 실행할 때는 서버 설정을 사용함)<br>
 	/// frameskip을 늘리면 화면 표시도 업데이트 안하므로 훨씬 빠릅니다
-    public static int SetFrameSkip = 0;
-    
-    /// 로컬에서 게임을 실행할 때 사용자 키보드/마우스 입력 허용 여부 (코드 제출 후 서버에서 게임을 실행할 때는 서버 설정을 사용함)	
-    public static boolean EnableUserInput = true;
-    
-    /// 로컬에서 게임을 실행할 때 전체 지도를 다 보이게 할 것인지 여부 (코드 제출 후 서버에서 게임을 실행할 때는 서버 설정을 사용함)    
+	public static int SetFrameSkip = 0;
+
+	/// 로컬에서 게임을 실행할 때 사용자 키보드/마우스 입력 허용 여부 (코드 제출 후 서버에서 게임을 실행할 때는 서버 설정을 사용함)	
+	public static boolean EnableUserInput = true;
+
+	/// 로컬에서 게임을 실행할 때 전체 지도를 다 보이게 할 것인지 여부 (코드 제출 후 서버에서 게임을 실행할 때는 서버 설정을 사용함)    
 	public static boolean EnableCompleteMapInformation = false;
 
-	
 	/// MapGrid 에서 한 개 GridCell 의 size
 	public static int MAP_GRID_SIZE = 32;
-	
+
 	/// StarCraft 및 BWAPI 에서 1 Tile = 32 * 32 Point (Pixel) 입니다<br>
 	/// Position 은 Point (Pixel) 단위이고, TilePosition 은 Tile 단위입니다 
 	public static int TILE_SIZE = 32;
@@ -61,14 +52,11 @@ public class Config {
 	/// 건물과 건물간 띄울 최소한의 간격 - Terran_Supply_Depot 건물의 경우
 	public static int BuildingSupplyDepotSpacing = 0;
 	/// 건물과 건물간 띄울 최소한의 간격 - 방어 건물의 경우 (포톤캐논. 성큰콜로니. 스포어콜로니. 터렛. 벙커)
-	public static int BuildingDefenseTowerSpacing = 0; 
-	
-	
-	
+	public static int BuildingDefenseTowerSpacing = 0;
 
 	/// 화면 표시 여부 - 게임 정보
 	public static boolean DrawGameInfo = true;
-	
+
 	/// 화면 표시 여부 - 미네랄, 가스
 	public static boolean DrawResourceInfo = false;
 	/// 화면 표시 여부 - 지도
@@ -90,12 +78,12 @@ public class Config {
 	public static boolean DrawBuildingInfo = true;
 	/// 화면 표시 여부 - 건물 ConstructionPlace 예약 상황
 	public static boolean DrawReservedBuildingTiles = false;
-	
+
 	/// 화면 표시 여부 - 정찰 상태
 	public static boolean DrawScoutInfo = true;
 	/// 화면 표시 여부 - 일꾼 목록
 	public static boolean DrawWorkerInfo = true;
-	
+
 	/// 화면 표시 여부 - 마우스 커서	
 	public static boolean DrawMouseCursorInfo = true;
 
@@ -103,6 +91,5 @@ public class Config {
 	public static final Color ColorLineMineral = Color.Cyan;
 	public static final Color ColorUnitNearEnemy = Color.Red;
 	public static final Color ColorUnitNotNearEnemy = Color.Green;
-	
-	
+
 }

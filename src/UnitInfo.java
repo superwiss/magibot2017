@@ -16,8 +16,7 @@ public class UnitInfo {
 	private UnitType type;
 	private boolean completed;
 
-	public UnitInfo()
-	{
+	public UnitInfo() {
 		unitID = 0;
 		lastHealth = 0;
 		player = null;
@@ -90,20 +89,22 @@ public class UnitInfo {
 	public void setCompleted(boolean completed) {
 		this.completed = completed;
 	}
-	
+
 	@Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof UnitInfo)) return false;
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (!(o instanceof UnitInfo))
+			return false;
 
-        UnitInfo that = (UnitInfo) o;
+		UnitInfo that = (UnitInfo) o;
 
-        if (this.getUnitID() != that.getUnitID()) return false;
+		if (this.getUnitID() != that.getUnitID())
+			return false;
 
-        return true;
-    }
+		return true;
+	}
 
-	
 //		const bool operator == (BWAPI::Unit unit) const
 //		{
 //			return unitID == unit->getID();
