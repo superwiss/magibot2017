@@ -1,14 +1,12 @@
+import java.util.List;
+
+import bwapi.Position;
 import bwapi.Race;
 import bwapi.Unit;
 import bwapi.UnitType;
 import bwta.BWTA;
 import bwta.BaseLocation;
-import bwta.Chokepoint;
 
-/// 상황을 판단하여, 정찰, 빌드, 공격, 방어 등을 수행하도록 총괄 지휘를 하는 class <br>
-/// InformationManager 에 있는 정보들로부터 상황을 판단하고, <br>
-/// BuildManager 의 buildQueue에 빌드 (건물 건설 / 유닛 훈련 / 테크 리서치 / 업그레이드) 명령을 입력합니다.<br>
-/// 정찰, 빌드, 공격, 방어 등을 수행하는 코드가 들어가는 class
 public class StrategyManager {
 
 	private static StrategyManager instance = new StrategyManager();
@@ -17,11 +15,17 @@ public class StrategyManager {
 
 	private boolean isFullScaleAttackStarted;
 	private boolean isInitialBuildOrderFinished;
+	private Strategy strategy;
 
 	/// static singleton 객체를 리턴합니다
 	public static StrategyManager Instance() {
 		return instance;
 	}
+
+	// 핵심 전략. 네이밍 룰은 상대종족 + 맵 + 전략명
+	public enum Strategy {
+		FourDrone, NoneDrone
+	};
 
 	public StrategyManager() {
 		isFullScaleAttackStarted = false;
@@ -51,6 +55,8 @@ public class StrategyManager {
 		executeBasicCombatUnitTraining();
 
 		executeCombat();
+
+		executeTerminator();
 	}
 
 	public void setInitialBuildOrder() {
@@ -299,20 +305,16 @@ public class StrategyManager {
 			// 4드론 전략...
 			// 한 방에 적을 찾으면 이길 수 있지만, 그렇지 못하면 질 확률이 높다.
 			// //////////////
+			setStrategy(Strategy.FourDrone);
 			// 스포닝 풀을 짓는다.
 			BuildManager.Instance().buildQueue.queueAsLowestPriority(UnitType.Zerg_Spawning_Pool, BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
 			// 드론 1기 생성
 			BuildManager.Instance().buildQueue.queueAsLowestPriority(InformationManager.Instance().getWorkerType(), BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
-			// 6저글링
+			// 8저글링
 			BuildManager.Instance().buildQueue.queueAsLowestPriority(UnitType.Zerg_Zergling, BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
 			BuildManager.Instance().buildQueue.queueAsLowestPriority(UnitType.Zerg_Zergling, BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
 			BuildManager.Instance().buildQueue.queueAsLowestPriority(UnitType.Zerg_Zergling, BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
-			// 오버로드 생성
-			BuildManager.Instance().buildQueue.queueAsLowestPriority(InformationManager.Instance().getBasicSupplyProviderUnitType(), BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
-			// 추가 저글링
-			for (int i = 0; i < 1000; ++i) {
-				BuildManager.Instance().buildQueue.queueAsLowestPriority(UnitType.Zerg_Zergling, BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
-			}
+			BuildManager.Instance().buildQueue.queueAsLowestPriority(UnitType.Zerg_Zergling, BuildOrderItem.SeedPositionStrategy.MainBaseLocation, true);
 			/*
 			// //////////////
 			// 9드론 전략...
@@ -522,6 +524,11 @@ public class StrategyManager {
 			return;
 		}
 
+		// 4dron 모드일 경우, 더 이상 드론을 생성하지 않는다.
+		if (getStrategy().equals(Strategy.FourDrone)) {
+			return;
+		}
+
 		if (MyBotModule.Broodwar.self().minerals() >= 50) {
 			// workerCount = 현재 일꾼 수 + 생산중인 일꾼 수
 			int workerCount = MyBotModule.Broodwar.self().allUnitCount(InformationManager.Instance().getWorkerType());
@@ -586,6 +593,9 @@ public class StrategyManager {
 			// 서플라이가 다 꽉찼을때 새 서플라이를 지으면 지연이 많이 일어나므로, supplyMargin (게임에서의 서플라이 마진 값의 2배)만큼 부족해지면 새 서플라이를 짓도록 한다
 			// 이렇게 값을 정해놓으면, 게임 초반부에는 서플라이를 너무 일찍 짓고, 게임 후반부에는 서플라이를 너무 늦게 짓게 된다
 			int supplyMargin = 12;
+			if (getStrategy().equals(Strategy.FourDrone)) {
+				supplyMargin = 4;
+			}
 
 			// currentSupplyShortage 를 계산한다
 			int currentSupplyShortage = MyBotModule.Broodwar.self().supplyUsed() + supplyMargin - MyBotModule.Broodwar.self().supplyTotal();
@@ -640,8 +650,13 @@ public class StrategyManager {
 			return;
 		}
 
+		int thresholdMineralsForTraning = 200;
+		if (getStrategy().equals(Strategy.FourDrone)) {
+			thresholdMineralsForTraning = 50;
+		}
+
 		// 기본 병력 추가 훈련
-		if (MyBotModule.Broodwar.self().minerals() >= 200 && MyBotModule.Broodwar.self().supplyUsed() < 390) {
+		if (MyBotModule.Broodwar.self().minerals() >= thresholdMineralsForTraning && MyBotModule.Broodwar.self().supplyUsed() < 390) {
 			for (Unit unit : MyBotModule.Broodwar.self().getUnits()) {
 				if (unit.getType() == InformationManager.Instance().getBasicCombatBuildingType()) {
 					if (unit.isTraining() == false || unit.getLarva().size() > 0) {
@@ -658,17 +673,58 @@ public class StrategyManager {
 
 		// 공격 모드가 아닐 때에는 전투유닛들을 아군 진영 길목에 집결시켜서 방어
 		if (isFullScaleAttackStarted == false) {
-			Chokepoint firstChokePoint = BWTA.getNearestChokepoint(InformationManager.Instance().getMainBaseLocation(InformationManager.Instance().selfPlayer).getTilePosition());
+			Position standbyPosition = null;
+
+			// 4드론일 경우, 유닛을 맵 중앙으로 집결.
+			if (getStrategy().equals(Strategy.FourDrone)) {
+				standbyPosition = new Position(MyBotModule.Broodwar.mapWidth() / 2 * 32, MyBotModule.Broodwar.mapHeight() / 2 * 32);
+			} else {
+				standbyPosition = BWTA.getNearestChokepoint(InformationManager.Instance().getMainBaseLocation(InformationManager.Instance().selfPlayer).getTilePosition()).getCenter();
+			}
 
 			for (Unit unit : MyBotModule.Broodwar.self().getUnits()) {
 				if (unit.getType() == InformationManager.Instance().getBasicCombatUnitType() && unit.isIdle()) {
-					commandUtil.attackMove(unit, firstChokePoint.getCenter());
+					commandUtil.attackMove(unit, standbyPosition);
 				}
 			}
 
 			// 전투 유닛이 2개 이상 생산되었고, 적군 위치가 파악되었으면 총공격 모드로 전환
 			if (MyBotModule.Broodwar.self().completedUnitCount(InformationManager.Instance().getBasicCombatUnitType()) > 2) {
-				if (InformationManager.Instance().enemyPlayer != null && InformationManager.Instance().enemyRace != Race.Unknown && InformationManager.Instance().getOccupiedBaseLocations(InformationManager.Instance().enemyPlayer).size() > 0) {
+				// 4드론 전략일 경우 적군의 위치가 발견되지 않았으면 저글링으로 정찰을 보낸다.
+				if (getStrategy().equals(Strategy.FourDrone)) {
+					// 저글링 두 마리를 남은 곳으로 정찰 보낸다.
+					if (0 == ScoutManager.Instance().getExtraScoutUnitsSize()) {
+						Unit scoutUnit1 = null;
+						Unit scoutUnit2 = null;
+						for (Unit unit : MyBotModule.Broodwar.self().getUnits()) {
+							if (unit.getType() == InformationManager.Instance().getBasicCombatUnitType()) {
+								if (null == scoutUnit1) {
+									scoutUnit1 = unit;
+								} else if (null == scoutUnit2) {
+									scoutUnit2 = unit;
+									break;
+								}
+							}
+						}
+						scoutUnit1.move(InformationManager.Instance().getFirstChokePoint(MyBotModule.Broodwar.self()).getCenter());
+						scoutUnit2.move(InformationManager.Instance().getFirstChokePoint(MyBotModule.Broodwar.self()).getCenter());
+						List<BaseLocation> remainLocation = ScoutManager.Instance().getRemainEnemyStartLocatons();
+						if (remainLocation.size() > 0) {
+							ScoutManager.Instance().registerExtraScoutUnit(scoutUnit1, remainLocation.get(0).getPosition());
+						}
+						if (remainLocation.size() > 1) {
+							ScoutManager.Instance().registerExtraScoutUnit(scoutUnit2, remainLocation.get(1).getPosition());
+						}
+					}
+					// 적이 발견되면 저글링 정찰을 중단하고 공격한다.
+					if (InformationManager.Instance().enemyPlayer != null && InformationManager.Instance().enemyRace != Race.Unknown && InformationManager.Instance().getOccupiedBaseLocations(InformationManager.Instance().enemyPlayer).size() > 0) {
+						isFullScaleAttackStarted = true;
+					}
+					// 적을 찾지 못했지만, 남은 장소가 한 곳이라면, 그곳으로 공격을 들어간다.
+					if (1 == ScoutManager.Instance().getRemainEnemyStartLocatons().size()) {
+						isFullScaleAttackStarted = true;
+					}
+				} else if (InformationManager.Instance().enemyPlayer != null && InformationManager.Instance().enemyRace != Race.Unknown && InformationManager.Instance().getOccupiedBaseLocations(InformationManager.Instance().enemyPlayer).size() > 0) {
 					isFullScaleAttackStarted = true;
 				}
 			}
@@ -677,7 +733,11 @@ public class StrategyManager {
 		else {
 			//std.cout << "enemy OccupiedBaseLocations : " << InformationManager.Instance().getOccupiedBaseLocations(InformationManager.Instance()._enemy).size() << std.endl;
 
-			if (InformationManager.Instance().enemyPlayer != null && InformationManager.Instance().enemyRace != Race.Unknown && InformationManager.Instance().getOccupiedBaseLocations(InformationManager.Instance().enemyPlayer).size() > 0) {
+			List<BaseLocation> remainLocation = ScoutManager.Instance().getRemainEnemyStartLocatons();
+
+			ScoutManager.Instance().unregusterAllExtraScoutUnits();
+
+			if (InformationManager.Instance().enemyPlayer != null && InformationManager.Instance().enemyRace != Race.Unknown && InformationManager.Instance().getOccupiedBaseLocations(InformationManager.Instance().enemyPlayer).size() > 0 || 1 == remainLocation.size()) {
 				// 공격 대상 지역 결정
 				BaseLocation targetBaseLocation = null;
 				double closestDistance = 100000000;
@@ -689,6 +749,10 @@ public class StrategyManager {
 						closestDistance = distance;
 						targetBaseLocation = baseLocation;
 					}
+				}
+
+				if (null == targetBaseLocation) {
+					targetBaseLocation = remainLocation.get(0);
 				}
 
 				if (targetBaseLocation != null) {
@@ -713,5 +777,31 @@ public class StrategyManager {
 				}
 			}
 		}
+	}
+
+	// 적 본진을 파괴했으면 이긴 것으로 간주하고 잔존 병력을 정리한다.
+	private void executeTerminator() {
+
+		if (MyBotModule.Broodwar.self().allUnitCount() > MyBotModule.Broodwar.enemy().allUnitCount() * 3) {
+			for (Unit enemyUnit : MyBotModule.Broodwar.enemy().getUnits()) {
+				if (enemyUnit.getType().isBuilding()) {
+					for (Unit myUnit : MyBotModule.Broodwar.self().getUnits()) {
+						if (myUnit.canAttack()) {
+							if (myUnit.isIdle()) {
+								commandUtil.attackMove(myUnit, enemyUnit.getPosition());
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	public void setStrategy(Strategy strategy) {
+		this.strategy = strategy;
+	}
+
+	public Strategy getStrategy() {
+		return this.strategy;
 	}
 }

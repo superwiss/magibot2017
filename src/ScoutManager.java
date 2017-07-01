@@ -1,4 +1,8 @@
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
@@ -18,6 +22,7 @@ public class ScoutManager {
 
 	private Unit currentScoutUnit;
 	private int currentScoutStatus;
+	private Map<Unit, Position> extraScoutUnits = new HashMap<>();;
 
 	public enum ScoutStatus {
 		NoScout,						///< 정찰 유닛을 미지정한 상태
@@ -131,10 +136,10 @@ public class ScoutManager {
 					if (MyBotModule.Broodwar.isExplored(startLocation.getTilePosition()) == false) {
 						if (currentScoutUnit.isFlying()) {
 							// AirDistance 를 기준으로 가장 가까운 곳으로 선정
-							tempDistance = (double) (InformationManager.Instance().getMainBaseLocation(MyBotModule.Broodwar.self()).getAirDistance(startLocation) + 0.5);
+							tempDistance = currentScoutUnit.getDistance(startLocation);
 						} else {
 							// GroundDistance 를 기준으로 가장 가까운 곳으로 선정
-							tempDistance = (double) (InformationManager.Instance().getMainBaseLocation(MyBotModule.Broodwar.self()).getGroundDistance(startLocation) + 0.5);
+							tempDistance = BWTA.getGroundDistance(currentScoutUnit.getTilePosition(), startLocation.getTilePosition());
 						}
 						if (tempDistance > 0 && tempDistance < closestDistance) {
 							closestBaseLocation = startLocation;
@@ -172,6 +177,12 @@ public class ScoutManager {
 					currentScoutStatus = ScoutStatus.NoScout.ordinal();
 					currentScoutTargetPosition = myBaseLocation.getPosition();
 				}
+			}
+		}
+
+		for (Unit unit : extraScoutUnits.keySet()) {
+			if (!unit.isAttackFrame() || !unit.isMoving()) {
+				unit.attack(extraScoutUnits.get(unit));
 			}
 		}
 	}
@@ -374,5 +385,44 @@ public class ScoutManager {
 	/// 적군의 Main Base Location 이 있는 Region 의 경계선에 해당하는 Vertex 들의 목록을 리턴합니다
 	public Vector<Position> getEnemyRegionVertices() {
 		return enemyBaseRegionVertices;
+	}
+
+	// 정찰 유닛 + 정찰 장소를 등록한다. 
+	public void registerExtraScoutUnit(Unit unit, Position position) {
+		extraScoutUnits.put(unit, position);
+	}
+
+	// 등록된 추가 정찰 유닛을 취소한다.
+	public void unregusterExtraScoutUnit(Unit unit) {
+		extraScoutUnits.remove(unit);
+	}
+
+	// 모든 추가 정찰 유닛의 등록을 취소한다.
+	public void unregusterAllExtraScoutUnits() {
+		extraScoutUnits.clear();
+	}
+
+	// 추가 정찰 유닛의 개수를 리턴한다.
+	public int getExtraScoutUnitsSize() {
+		return extraScoutUnits.size();
+	}
+
+	// 아직 정찰되지 않은 - 남아 있는 적군의 시작 위치 목록을 반환.
+	public List<BaseLocation> getRemainEnemyStartLocatons() {
+		List<BaseLocation> result = new ArrayList<>();
+
+		for (BaseLocation startLocation : BWTA.getStartLocations()) {
+			// 적 본진을 찾았으면, 그 위치를 반환한다.
+			if (InformationManager.Instance().hasBuildingAroundBaseLocation(startLocation, InformationManager.Instance().enemyPlayer)) {
+				result.add(startLocation);
+				break;
+			}
+			// if we haven't explored it yet (방문했었던 곳은 다시 가볼 필요 없음)
+			if (MyBotModule.Broodwar.isExplored(startLocation.getTilePosition()) == false) {
+				result.add(startLocation);
+			}
+		}
+
+		return result;
 	}
 }
