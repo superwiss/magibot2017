@@ -10,6 +10,7 @@ import bwta.BaseLocation;
 public class StrategyManager {
 
 	private static StrategyManager instance = new StrategyManager();
+	private static boolean isSearchingFirstExpansion = false;
 
 	private CommandUtil commandUtil = new CommandUtil();
 
@@ -782,13 +783,30 @@ public class StrategyManager {
 	// 적 본진을 파괴했으면 이긴 것으로 간주하고 잔존 병력을 정리한다.
 	private void executeTerminator() {
 
-		if (MyBotModule.Broodwar.self().allUnitCount() > MyBotModule.Broodwar.enemy().allUnitCount() * 3) {
-			for (Unit enemyUnit : MyBotModule.Broodwar.enemy().getUnits()) {
-				if (enemyUnit.getType().isBuilding()) {
-					for (Unit myUnit : MyBotModule.Broodwar.self().getUnits()) {
-						if (myUnit.canAttack()) {
-							if (myUnit.isIdle()) {
-								commandUtil.attackMove(myUnit, enemyUnit.getPosition());
+		if (isFullScaleAttackStarted) {
+			if (MyBotModule.Broodwar.self().allUnitCount() > MyBotModule.Broodwar.enemy().allUnitCount() * 3) {
+				for (Unit enemyUnit : MyBotModule.Broodwar.enemy().getUnits()) {
+					if (enemyUnit.getType().isBuilding()) {
+						for (Unit myUnit : MyBotModule.Broodwar.self().getUnits()) {
+							if (myUnit.canAttack()) {
+								if (myUnit.isIdle()) {
+									commandUtil.attackMove(myUnit, enemyUnit.getPosition());
+								}
+							}
+						}
+					}
+				}
+
+				// 놀고 있는 오버로드가 있고, 아직 확장 지역을 정찰 안했으면, 정찰을 한다.
+				if (false == isSearchingFirstExpansion) {
+					for (Unit unit : InformationManager.Instance().selfPlayer.getUnits()) {
+						if (unit.getType().equals(UnitType.Zerg_Overlord)) {
+							if (unit.isIdle()) {
+								BaseLocation enemyFirstExpansionLocation = InformationManager.Instance().getFirstExpansionLocation(InformationManager.Instance().enemyPlayer);
+								if (null != enemyFirstExpansionLocation) {
+									unit.move(enemyFirstExpansionLocation.getPosition());
+									isSearchingFirstExpansion = true;
+								}
 							}
 						}
 					}
