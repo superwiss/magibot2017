@@ -13,6 +13,7 @@ public abstract class StrategyBase implements Observer {
 
 	protected StrategyManager strategyManager;
 	protected CommandUtil commandUtil;
+	protected MapInfo mapInfo = MapInfo.Instance();
 
 	private StrategyManager.Strategy myStrategy;
 

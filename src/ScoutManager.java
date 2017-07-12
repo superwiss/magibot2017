@@ -23,6 +23,7 @@ public class ScoutManager {
 	private Unit currentScoutUnit;
 	private int currentScoutStatus;
 	private Map<Unit, Position> extraScoutUnits = new HashMap<>();;
+	private MapInfo mapInfo = MapInfo.Instance();
 
 	public enum ScoutStatus {
 		NoScout,						///< 정찰 유닛을 미지정한 상태
@@ -52,7 +53,11 @@ public class ScoutManager {
 
 		// scoutUnit 을 지정하고, scoutUnit 의 이동을 컨트롤함. 
 		assignScoutIfNeeded();
-		moveScoutUnit();
+
+		// 알려진 맵이 아니라면 자동으로 가장 가까운 스타팅 위치부터 정찰한다.
+		if (!mapInfo.isKnownMap()) {
+			moveScoutUnit();
+		}
 
 		// 참고로, scoutUnit 의 이동에 의해 발견된 정보를 처리하는 것은 InformationManager.update() 에서 수행함
 	}
@@ -75,6 +80,10 @@ public class ScoutManager {
 					for (Unit unit : MyBotModule.Broodwar.self().getUnits()) {
 						if (unit.getType().equals(UnitType.Zerg_Overlord)) {
 							setScoutUnit(unit);
+							// 알려진 맵이라면 첫 번째 위치부터 정찰을 수행한다.
+							if (mapInfo.isKnownMap()) {
+								unit.move(mapInfo.getSearchingOrder(0).toPosition());
+							}
 							return;
 						}
 					}

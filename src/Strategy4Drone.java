@@ -17,6 +17,7 @@ public class Strategy4Drone extends StrategyBase {
 	public void init() {
 		setSupplyMargin(4);
 		setThresholdMineralsForTraning(50);
+		System.out.println(MyBotModule.Broodwar.getStartLocations());
 	}
 
 	@Override
@@ -78,14 +79,24 @@ public class Strategy4Drone extends StrategyBase {
 							}
 						}
 					}
-					scoutUnit1.move(InformationManager.Instance().getFirstChokePoint(MyBotModule.Broodwar.self()).getCenter());
-					scoutUnit2.move(InformationManager.Instance().getFirstChokePoint(MyBotModule.Broodwar.self()).getCenter());
-					List<BaseLocation> remainLocation = ScoutManager.Instance().getRemainEnemyStartLocatons();
-					if (remainLocation.size() > 0) {
-						ScoutManager.Instance().registerExtraScoutUnit(scoutUnit1, remainLocation.get(0).getPosition());
-					}
-					if (remainLocation.size() > 1) {
-						ScoutManager.Instance().registerExtraScoutUnit(scoutUnit2, remainLocation.get(1).getPosition());
+					// 알려진 맵이라면 저글링 2마리를 1번째, 2번째 위치로 정찰보낸다. (0번째 위치는 오버로드가...)
+					if (mapInfo.isKnownMap()) {
+						if (scoutUnit1.isIdle()) {
+							scoutUnit1.move(mapInfo.getSearchingOrder(1).toPosition());
+						}
+						if (scoutUnit2.isIdle()) {
+							scoutUnit2.move(mapInfo.getSearchingOrder(2).toPosition());
+						}
+					} else {
+						scoutUnit1.move(InformationManager.Instance().getFirstChokePoint(MyBotModule.Broodwar.self()).getCenter());
+						scoutUnit2.move(InformationManager.Instance().getFirstChokePoint(MyBotModule.Broodwar.self()).getCenter());
+						List<BaseLocation> remainLocation = ScoutManager.Instance().getRemainEnemyStartLocatons();
+						if (remainLocation.size() > 0) {
+							ScoutManager.Instance().registerExtraScoutUnit(scoutUnit1, remainLocation.get(0).getPosition());
+						}
+						if (remainLocation.size() > 1) {
+							ScoutManager.Instance().registerExtraScoutUnit(scoutUnit2, remainLocation.get(1).getPosition());
+						}
 					}
 				}
 				// 적이 발견되면 저글링 정찰을 중단하고 공격한다.
