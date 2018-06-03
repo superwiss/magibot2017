@@ -1,0 +1,9 @@
+[Angle]
+0 ~ 6.28
+
+[Marine]
+attack: 127
+cooldown: 17
+
+[Zerging]
+cooldown: 10
